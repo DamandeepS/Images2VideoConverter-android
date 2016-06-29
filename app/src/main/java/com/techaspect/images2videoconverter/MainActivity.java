@@ -2,57 +2,43 @@ package com.techaspect.images2videoconverter;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
-import android.provider.DocumentsContract;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.util.LruCache;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.InputType;
 import android.text.TextUtils;
-import android.util.AttributeSet;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bignerdranch.android.multiselector.MultiSelector;
 import com.darsh.multipleimageselect.activities.AlbumSelectActivity;
 import com.darsh.multipleimageselect.helpers.Constants;
 import com.darsh.multipleimageselect.models.Image;
+import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
+import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
+import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -62,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
     private String mGalleryFolder = "com.damandeepsingh.i2v_converter.import";
     private File imagesLocation;
     private static final int REQUEST_IMAGES_FROM_GALLERY = 1;
+    private static int fileNumber=0;
+    FFmpeg ffmpeg;
 
     public void startRemoving(View view) {
         deleteAllImages();
@@ -96,6 +84,51 @@ public class MainActivity extends AppCompatActivity {
         layoutManager = new GridLayoutManager(this,3);
         mRecyclerView.setLayoutManager(layoutManager);
         updateAdapter();
+
+        checkFFmpeg();
+    }
+
+    private void checkFFmpeg() {
+        ffmpeg = FFmpeg.getInstance(this);
+        try {
+            ffmpeg.loadBinary(new LoadBinaryResponseHandler() {
+
+                @Override
+                public void onStart() {}
+
+                @Override
+                public void onFailure() {
+
+                }
+
+                @Override
+                public void onSuccess() {}
+
+                @Override
+                public void onFinish() {}
+            });
+        } catch (FFmpegNotSupportedException e) {
+            // Handle if FFmpeg is not supported by device
+
+            final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+            builder.setTitle("Unsupported Device");
+
+            TextView tv = new TextView(this);
+            tv.setText(R.string.FFmpeg_not_supported);
+
+            builder.setView(tv);
+
+            builder.setPositiveButton("Exit", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    MainActivity.this.finishAffinity();
+                }
+            });
+
+            builder.setNegativeButton("Continue", null);
+            builder.show();
+        }
     }
 
     @Override
@@ -108,6 +141,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(this, "No Images selected", Toast.LENGTH_LONG).show();
                 else
                 if (data != null) {
+
                     /* Multiple Images are selected */
                     ArrayList<Parcelable> list = data.getParcelableArrayListExtra(Constants.INTENT_EXTRA_IMAGES);
                     // iterate over these images
@@ -136,14 +170,29 @@ public class MainActivity extends AppCompatActivity {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            fileNumber++;
         }
     }
 
     private File createImageFile() throws IOException {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "IMAGE_" + timeStamp + "_";
+        checkExistingFileNames();
+        String number =  String.format("%03d", fileNumber);
+        String imageFileName = "IMAGE_" + number;
+//        check if file with same name exists
 
-        return File.createTempFile(imageFileName,".jpg", imagesLocation);
+        Log.d(TAG, "createImageFile: imageFileName: " + imageFileName);
+        File file = new File(imagesLocation,imageFileName + ".jpg");
+        file.createNewFile();
+        return file;
+    }
+
+    private void checkExistingFileNames() {
+        for (File image: imagesLocation.listFiles())
+            if (image.getName().contains(String.valueOf(fileNumber))) {
+                fileNumber++;
+                checkExistingFileNames();
+            }
     }
 
     private void requestNecessaryPermissions() {
@@ -295,7 +344,7 @@ public class MainActivity extends AppCompatActivity {
                         String frameDurationString = videoFrameDurationEditText.getText().toString();
                         if (!TextUtils.isEmpty(frameDurationString))
                             frameDuration = Integer.parseInt(frameDurationString);
-                        Encode2Video e2v = new Encode2Video(MainActivity.this, imagesLocation);
+                        Encode2Video e2v = new Encode2Video(MainActivity.this, imagesLocation, ffmpeg);
                         if (TextUtils.isEmpty(videoFileName) || videoFileName.contains(" "))
                             videoFileNameEditText.setError("Enter a valid file name");
                         else if (TextUtils.isEmpty(frameDurationString) || frameDuration<=0) {
@@ -303,6 +352,8 @@ public class MainActivity extends AppCompatActivity {
                         } else {
                             //Dismiss once everything is OK.
                             dialog.dismiss();
+
+
                             e2v.encodeVideo(videoFileName, frameDuration);
 
                         }
