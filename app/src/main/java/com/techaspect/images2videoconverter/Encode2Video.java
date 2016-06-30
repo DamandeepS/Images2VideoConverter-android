@@ -27,7 +27,7 @@ public class Encode2Video {
     private Context context;
     private String outputFileName;
     private ProgressDialog dialog ;
-    private int frameDuration;
+    private float frameDuration;
     FFmpeg ffmpeg;
 
     private static final String TAG = "Encode2Video";
@@ -50,7 +50,7 @@ public class Encode2Video {
                         "-r",
                         "30",
                         "-t",
-                        String.valueOf(imagesLocation.listFiles().length * frameDuration * 10),
+                        String.valueOf((int)(imagesLocation.listFiles().length * frameDuration * 10)),
                         "-pix_fmt",
                         "yuv420p",
                         file.getAbsolutePath()
@@ -112,7 +112,7 @@ public class Encode2Video {
         this.imagesLocation = imagesLocation;
     }
 
-    public void encodeVideo(String outputFileName, int frameDuration) {
+    public void encodeVideo(String outputFileName, float frameDuration) {
         dialog = new ProgressDialog(context);
         dialog.setMessage("Converting...");
         dialog.setIndeterminate(true);

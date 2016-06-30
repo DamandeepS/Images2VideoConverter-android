@@ -340,15 +340,15 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
                         // TODO Do something
-                        int frameDuration=0;
+                        float frameDuration=0f;
                         String videoFileName = videoFileNameEditText.getText().toString();
                         String frameDurationString = videoFrameDurationEditText.getText().toString();
                         if (!TextUtils.isEmpty(frameDurationString))
-                            frameDuration = Integer.parseInt(frameDurationString);
+                            frameDuration = Float.parseFloat(frameDurationString);
                         Encode2Video e2v = new Encode2Video(MainActivity.this, imagesLocation, ffmpeg);
                         if (TextUtils.isEmpty(videoFileName) || videoFileName.contains(" "))
                             videoFileNameEditText.setError("Enter a valid file name");
-                        else if (TextUtils.isEmpty(frameDurationString) || frameDuration<=0) {
+                        else if (TextUtils.isEmpty(frameDurationString) || frameDuration<=0f) {
                             videoFrameDurationEditText.setError("Enter duration greater than 0");
                         } else {
                             //Dismiss once everything is OK.
@@ -359,7 +359,7 @@ public class MainActivity extends AppCompatActivity {
 
                         }
 
-                        Log.d(TAG, "onClick: FileName Entered " + videoFileName + ", with per frame duration of " + frameDuration + " ms");
+                        Log.d(TAG, "onClick: FileName Entered " + videoFileName + ", with per frame duration of " + frameDuration + " sec");
                     }
                 });
             }
