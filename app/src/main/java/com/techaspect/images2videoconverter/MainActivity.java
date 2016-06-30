@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private String mGalleryFolder = "com.damandeepsingh.i2v_converter.import";
     private File imagesLocation;
     private static final int REQUEST_IMAGES_FROM_GALLERY = 1;
-    private static int fileNumber=0;
+    public static int fileNumber=0;
     FFmpeg ffmpeg;
 
     public void startRemoving(View view) {
@@ -308,6 +308,7 @@ public class MainActivity extends AppCompatActivity {
         } finally {
             adapter.notifyDataSetChanged();
         }
+        fileNumber=0;
     }
 
     public void createVideo(View view) {

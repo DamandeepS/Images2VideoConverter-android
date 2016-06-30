@@ -86,6 +86,8 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
             }
             i++;
         }
+
+        MainActivity.fileNumber=0;
     }
 
 
