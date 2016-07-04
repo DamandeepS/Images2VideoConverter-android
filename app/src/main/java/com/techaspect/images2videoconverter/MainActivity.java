@@ -358,7 +358,7 @@ public class MainActivity extends AppCompatActivity {
                         String frameDurationString = videoFrameDurationEditText.getText().toString();
                         if (!TextUtils.isEmpty(frameDurationString))
                             frameDuration = Float.parseFloat("0"+frameDurationString); //hack for avoiding Float.parseFloat("."); error
-                        Encode2Video e2v = new Encode2Video(MainActivity.this, imagesLocation, ffmpeg);
+
                         if (TextUtils.isEmpty(videoFileName) || videoFileName.contains(" "))
                             videoFileNameEditText.setError("Enter a valid file name");
                         else if (TextUtils.isEmpty(frameDurationString) || frameDuration<=0f) {
@@ -372,7 +372,6 @@ public class MainActivity extends AppCompatActivity {
                             serviceIntent.putExtra("fileName",videoFileName);
                             serviceIntent.putExtra("frameDuration", frameDuration);
                             startService(serviceIntent);
-//                            e2v.encodeVideo(videoFileName, frameDuration);
 
                         } else
                             Toast.makeText(MainActivity.this,"Either FFmpeg is not available or Busy", Toast.LENGTH_LONG).show();
