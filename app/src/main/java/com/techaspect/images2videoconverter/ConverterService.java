@@ -11,6 +11,7 @@ import android.media.AudioTimestamp;
 import android.media.MediaTimestamp;
 import android.net.Uri;
 import android.os.Environment;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -34,7 +35,7 @@ public class ConverterService extends IntentService {
     private static String TAG = "ConverterService";
     private String fileName = "TEST";
     private float frameDuration = 1F;
-    private  Notification.Builder notificationBuilder;
+    private NotificationCompat.Builder notificationBuilder;
 
     public ConverterService(String name) {
         super(name);
@@ -48,9 +49,9 @@ public class ConverterService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         try {
-            createNotification();
             fileName = intent.getStringExtra("fileName");
             frameDuration = intent.getFloatExtra("frameDuration",1F);
+            createNotification();
             final float videoDuration = imagesLocation.listFiles().length * frameDuration * 1000;
             Log.d(TAG, "doInBackground: Duration: " + imagesLocation.listFiles().length * frameDuration);
             file = this.GetSDPathToFile("aatest", fileName + ".mp4");
@@ -99,12 +100,15 @@ public class ConverterService extends IntentService {
                     Intent startMovie = new Intent(Intent.ACTION_VIEW);
                     startMovie.setDataAndType(Uri.fromFile(file),"video/*");
                     PendingIntent pendingIntent  = PendingIntent.getActivity(ConverterService.this, 0, startMovie, 0);
+                    Bitmap bigImage = BitmapFactory.decodeFile(imagesLocation.listFiles()[(int)Math.floor(imagesLocation.listFiles().length/2)].getAbsolutePath());
                     notificationBuilder.setContentIntent(pendingIntent)
                             .setAutoCancel(true)
                             .setOngoing(false)
                             .setSmallIcon(R.mipmap.ic_notification_icon)
-                            .setLargeIcon(BitmapFactory.decodeFile(imagesLocation.listFiles()[0].getAbsolutePath()))
-                    .setSubText("FileName: " + fileName + "\nFile Location: " + fileLocation);
+                            .setStyle(new NotificationCompat.BigTextStyle().bigText("Encoding Finished"))
+                            .setStyle(new NotificationCompat.BigPictureStyle().bigPicture(bigImage))
+                            .setLargeIcon(bigImage)
+                            .setSubText("FileName: " + fileName + "\nFile Location: " + fileLocation);
                     notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
                 }
 
@@ -116,10 +120,11 @@ public class ConverterService extends IntentService {
                     if (array.length>1)
                         timeString = array[1].split(" ")[0];
                     Log.d(TAG, "onProgress: stringArray: " + timeString + " , in milliseconds: " +findMillisecondsFromTimestampString(timeString) );
+
                     notificationBuilder.setContentText(message)
                             .setOngoing(true)
                             .setSmallIcon(R.mipmap.ic_notification_icon)
-                            .setProgress((int)videoDuration, findMillisecondsFromTimestampString(timeString), false);
+                            .setProgress((int)videoDuration, findMillisecondsFromTimestampString(timeString), false); // #0;
 
                     notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
 
@@ -156,7 +161,7 @@ public class ConverterService extends IntentService {
     }
 
     private void createNotification() {
-        notificationBuilder = new Notification.Builder(this);
+        notificationBuilder = new NotificationCompat.Builder(this);
         notificationBuilder.setContentTitle("E2V Encoding : " + fileName )
                 .setContentText("Encoding video filename: " + fileName)
                 .setSmallIcon(R.mipmap.ic_notification_icon)

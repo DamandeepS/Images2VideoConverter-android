@@ -31,6 +31,7 @@ import com.darsh.multipleimageselect.helpers.Constants;
 import com.darsh.multipleimageselect.models.Image;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
+import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
 
 import java.io.File;
@@ -85,7 +86,6 @@ public class MainActivity extends AppCompatActivity {
         layoutManager = new GridLayoutManager(this,3);
         mRecyclerView.setLayoutManager(layoutManager);
         updateAdapter();
-
         checkFFmpeg();
     }
 
@@ -319,6 +319,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void createVideo(View view) {
+        if ( imagesLocation.listFiles().length==0) {
+            Toast.makeText(MainActivity.this,"Import at least one image to your project", Toast.LENGTH_LONG).show();
+            return;
+        }
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Encoding Options");
 
@@ -347,6 +351,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
                         // TODO Do something
+
                         float frameDuration=0f;
                         String videoFileName = videoFileNameEditText.getText().toString();
                         String frameDurationString = videoFrameDurationEditText.getText().toString();
@@ -358,6 +363,7 @@ public class MainActivity extends AppCompatActivity {
                         else if (TextUtils.isEmpty(frameDurationString) || frameDuration<=0f) {
                             videoFrameDurationEditText.setError("Enter duration greater than 0");
                         } else if (checkFFmpeg()){
+
                             //Dismiss once everything is OK.
                             dialog.dismiss();
 
