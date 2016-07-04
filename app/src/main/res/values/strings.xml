@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Images2VideoConverter</string>
+    <string name="app_name">E2V</string>
     <string name="action_settings">Settings</string>
     <string name="delete">Delete</string>
     <string name="FFmpeg_not_supported">FFmpeg is not supported by this device</string>

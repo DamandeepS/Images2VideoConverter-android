@@ -1,14 +1,11 @@
 package com.techaspect.images2videoconverter;
 
 import android.app.IntentService;
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.AudioTimestamp;
-import android.media.MediaTimestamp;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.v7.app.NotificationCompat;
@@ -19,9 +16,6 @@ import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.Timestamp;
-import java.sql.Date;
-import java.text.SimpleDateFormat;
 
 import static com.techaspect.images2videoconverter.MainActivity.ffmpeg;
 import static com.techaspect.images2videoconverter.MainActivity.imagesLocation;
@@ -99,16 +93,22 @@ public class ConverterService extends IntentService {
                     }
                     Intent startMovie = new Intent(Intent.ACTION_VIEW);
                     startMovie.setDataAndType(Uri.fromFile(file),"video/*");
-                    PendingIntent pendingIntent  = PendingIntent.getActivity(ConverterService.this, 0, startMovie, 0);
+
+                    Intent openLocation = new Intent(Intent.ACTION_VIEW);
+                    openLocation.setDataAndType(Uri.fromFile(file.getParentFile()),"resource/folder");
+                    PendingIntent pendingIntentLocation = PendingIntent.getActivity(ConverterService.this,0, openLocation, 0);
+                    PendingIntent pendingIntentMovie  = PendingIntent.getActivity(ConverterService.this, 0, startMovie, 0);
                     Bitmap bigImage = BitmapFactory.decodeFile(imagesLocation.listFiles()[(int)Math.floor(imagesLocation.listFiles().length/2)].getAbsolutePath());
-                    notificationBuilder.setContentIntent(pendingIntent)
+                    notificationBuilder.setContentIntent(pendingIntentLocation)
                             .setAutoCancel(true)
                             .setOngoing(false)
                             .setSmallIcon(R.mipmap.ic_notification_icon)
+                            .setContentTitle("E2V Encoding Complete: " + fileName)
                             .setStyle(new NotificationCompat.BigTextStyle().bigText("Encoding Finished"))
                             .setStyle(new NotificationCompat.BigPictureStyle().bigPicture(bigImage))
                             .setLargeIcon(bigImage)
-                            .setSubText("FileName: " + fileName + "\nFile Location: " + fileLocation);
+                            .addAction(R.mipmap.ic_play,"Play", pendingIntentMovie)
+                            .setSubText("FileName: " + fileName + "\nFile Location: " + fileLocation + "\n" + message);
                     notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
                 }
 
@@ -116,15 +116,17 @@ public class ConverterService extends IntentService {
                 public void onProgress(String message) {
                     Log.d(TAG, "onProgress: ENCODING PROGRESS " + message );
                     String[] array = message.split("time=");
-
+                    int frameDurationInMilliseconds = findMillisecondsFromTimestampString(timeString);
                     if (array.length>1)
                         timeString = array[1].split(" ")[0];
                     Log.d(TAG, "onProgress: stringArray: " + timeString + " , in milliseconds: " +findMillisecondsFromTimestampString(timeString) );
-
+                    int imageIndex = (imagesLocation.listFiles().length * frameDurationInMilliseconds) / (int) videoDuration;
                     notificationBuilder.setContentText(message)
                             .setOngoing(true)
                             .setSmallIcon(R.mipmap.ic_notification_icon)
-                            .setProgress((int)videoDuration, findMillisecondsFromTimestampString(timeString), false); // #0;
+                            .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
+                            .setStyle(new NotificationCompat.BigPictureStyle().bigPicture(BitmapFactory.decodeFile(imagesLocation.listFiles()[imageIndex].getAbsolutePath())))
+                            .setProgress((int)videoDuration, frameDurationInMilliseconds, false); // #0;
 
                     notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
 
@@ -133,6 +135,14 @@ public class ConverterService extends IntentService {
                 @Override
                 public void onFailure(String message) {
                     Log.d(TAG, "onFailure: ENCODING FAILURE " + message );
+                    notificationBuilder.setContentText(message)
+                            .setOngoing(false)
+                            .setContentTitle("Encoder Failed")
+                            .setSmallIcon(R.mipmap.ic_notification_icon)
+                            .setContentText(message)
+                            .setStyle(new NotificationCompat.BigTextStyle().bigText(message)); // #0;
+
+                    notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
                 }
             });
             Log.d(TAG, "onHandleIntent: fileName: " + fileName + ", fileDuration: " + frameDuration);

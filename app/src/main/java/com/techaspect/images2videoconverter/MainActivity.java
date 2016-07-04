@@ -87,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setLayoutManager(layoutManager);
         updateAdapter();
         checkFFmpeg();
+        InputImagesAdapter.renameAllImages();
     }
 
     private boolean checkFFmpeg() {

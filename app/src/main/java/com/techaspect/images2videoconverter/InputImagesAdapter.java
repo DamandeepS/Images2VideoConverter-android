@@ -58,6 +58,8 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
                 default:
                     break;
             }
+            mode.finish();
+            onDestroyActionMode(mode);
             return false;
         }
 
@@ -90,17 +92,18 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
         MainActivity.fileNumber=0;
 
         renameAllImages(); //Done So that FFmpeg could work seamlessly
+
     }
 
-    private void renameAllImages() {
-        for (int fileNumber = 0; fileNumber<imagesLocation.listFiles().length;fileNumber++) {
+    protected static void renameAllImages() {
+        for (int fileNumber = 0; fileNumber<MainActivity.imagesLocation.listFiles().length;fileNumber++) {
             String number =  String.format("%03d", fileNumber);
             String imageFileName = "IMAGE_" + number;
 //        check if file with same name exists
 
             Log.d(TAG, "createImageFile: imageFileName: " + imageFileName);
-            File file = new File(imagesLocation,imageFileName + ".jpg");
-            imagesLocation.listFiles()[fileNumber].renameTo(file);
+            File file = new File(MainActivity.imagesLocation,imageFileName + ".jpg");
+            MainActivity.imagesLocation.listFiles()[fileNumber].renameTo(file);
         }
     }
 
