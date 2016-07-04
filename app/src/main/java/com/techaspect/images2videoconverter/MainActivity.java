@@ -46,10 +46,11 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView.LayoutManager layoutManager;
     private RecyclerView.Adapter adapter;
     private String mGalleryFolder = "com.damandeepsingh.i2v_converter.import";
-    private File imagesLocation;
+    static File imagesLocation;
     private static final int REQUEST_IMAGES_FROM_GALLERY = 1;
     public static int fileNumber=0;
-    FFmpeg ffmpeg;
+    static FFmpeg ffmpeg;
+    boolean isFFmpegAvailable;
 
     public void startRemoving(View view) {
         deleteAllImages();
@@ -88,21 +89,26 @@ public class MainActivity extends AppCompatActivity {
         checkFFmpeg();
     }
 
-    private void checkFFmpeg() {
+    private boolean checkFFmpeg() {
         ffmpeg = FFmpeg.getInstance(this);
         try {
             ffmpeg.loadBinary(new LoadBinaryResponseHandler() {
 
                 @Override
-                public void onStart() {}
+                public void onStart() {
 
-                @Override
-                public void onFailure() {
-
+                    isFFmpegAvailable=false;
                 }
 
                 @Override
-                public void onSuccess() {}
+                public void onFailure() {
+                    isFFmpegAvailable=false;
+                }
+
+                @Override
+                public void onSuccess() {
+                    isFFmpegAvailable=true;
+                }
 
                 @Override
                 public void onFinish() {}
@@ -129,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
             builder.setNegativeButton("Continue", null);
             builder.show();
         }
+        return isFFmpegAvailable;
     }
 
     @Override
@@ -344,20 +351,24 @@ public class MainActivity extends AppCompatActivity {
                         String videoFileName = videoFileNameEditText.getText().toString();
                         String frameDurationString = videoFrameDurationEditText.getText().toString();
                         if (!TextUtils.isEmpty(frameDurationString))
-                            frameDuration = Float.parseFloat(frameDurationString);
+                            frameDuration = Float.parseFloat("0"+frameDurationString); //hack for avoiding Float.parseFloat("."); error
                         Encode2Video e2v = new Encode2Video(MainActivity.this, imagesLocation, ffmpeg);
                         if (TextUtils.isEmpty(videoFileName) || videoFileName.contains(" "))
                             videoFileNameEditText.setError("Enter a valid file name");
                         else if (TextUtils.isEmpty(frameDurationString) || frameDuration<=0f) {
                             videoFrameDurationEditText.setError("Enter duration greater than 0");
-                        } else {
+                        } else if (checkFFmpeg()){
                             //Dismiss once everything is OK.
                             dialog.dismiss();
 
+                            Intent serviceIntent = new Intent(MainActivity.this,ConverterService.class);
+                            serviceIntent.putExtra("fileName",videoFileName);
+                            serviceIntent.putExtra("frameDuration", frameDuration);
+                            startService(serviceIntent);
+//                            e2v.encodeVideo(videoFileName, frameDuration);
 
-                            e2v.encodeVideo(videoFileName, frameDuration);
-
-                        }
+                        } else
+                            Toast.makeText(MainActivity.this,"Either FFmpeg is not available or Busy", Toast.LENGTH_LONG).show();
 
                         Log.d(TAG, "onClick: FileName Entered " + videoFileName + ", with per frame duration of " + frameDuration + " sec");
                     }
