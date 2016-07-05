@@ -1,10 +1,12 @@
 package com.techaspect.images2videoconverter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.RecyclerView;
@@ -32,11 +34,13 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
     private File imagesLocation;
     private Bitmap placeholderBitmap;
     private Context context;
+    private ActionMode deleteActionMode;
     private MultiSelector mMultiSelector = new MultiSelector();
     private ActionMode.Callback mDeleteMode = new ActionMode.Callback() {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             ((AppCompatActivity)context).getMenuInflater().inflate(R.menu.recycler_view_item_context, menu);
+            mode.setTitle("Selected " + 1+ " image");
             return true;
         }
 
@@ -48,6 +52,7 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            mode.finish();
             switch (item.getItemId()) {
                 case R.id.delete_imported_item:
                     // Delete images from filesystem
@@ -58,8 +63,6 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
                 default:
                     break;
             }
-            mode.finish();
-            onDestroyActionMode(mode);
             return false;
         }
 
@@ -124,6 +127,7 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         File imageFile = imagesLocation.listFiles()[position];
+        holder.imageUri = Uri.fromFile(imageFile);
         Log.d(TAG, "onBindViewHolder: " + imageFile.getAbsolutePath());
         if (imageFile.exists()) {
             if (checkImageWorkerTask(imageFile, holder.getmImageView())) {
@@ -180,6 +184,7 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
     public class ViewHolder extends SwappingHolder
             implements View.OnClickListener, View.OnLongClickListener {
         private ImageView mImageView;
+        private Uri imageUri;
 
         public ViewHolder(View itemView) {
             super(itemView,mMultiSelector);
@@ -201,9 +206,25 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
                 return;
             }
 
+            if (!mMultiSelector.isSelectable()){
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(imageUri, "image/*");
+                context.startActivity(intent);
+            }
             if (!mMultiSelector.tapSelection(this)) {
+
                 setActivated(!isActivated());
                 mMultiSelector.setSelected(this, isActivated());
+            } else if (mMultiSelector.getSelectedPositions().size()==0) {
+                if (deleteActionMode!=null) {
+                    deleteActionMode.finish();
+                }
+            }
+            if (deleteActionMode!=null) {
+                if (mMultiSelector.getSelectedPositions().size()>1)
+                    deleteActionMode.setTitle("Selected " + mMultiSelector.getSelectedPositions().size()+ " images");
+                else
+                    deleteActionMode.setTitle("Selected " + 1+ " image");
             }
         }
 
@@ -217,7 +238,7 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
 
     private void startSelector() {
         AppCompatActivity activity = (MainActivity) context;
-        activity.startSupportActionMode(mDeleteMode);
+        deleteActionMode = activity.startSupportActionMode(mDeleteMode);
         mMultiSelector.setSelectable(true);
     }
 
