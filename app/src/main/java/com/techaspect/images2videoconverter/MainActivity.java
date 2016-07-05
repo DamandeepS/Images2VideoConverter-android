@@ -79,22 +79,16 @@ public class MainActivity extends AppCompatActivity {
 
         requestNecessaryPermissions();
 
+        mRecyclerView = (RecyclerView)findViewById(R.id.recyclerView);
 
         imagesLocation = getImagesLocation();
-
-        mRecyclerView = (RecyclerView)findViewById(R.id.recyclerView);
         layoutManager = new GridLayoutManager(this,3);
         mRecyclerView.setLayoutManager(layoutManager);
-    }
-
-    @Override
-    protected void onPostResume() {
-        super.onPostResume();
         updateAdapter();
-        checkFFmpeg();
-        InputImagesAdapter.renameAllImages();  //Sorting and renaming images in order for FFmpeg to work
+
 
     }
+
 
     private boolean checkFFmpeg() {
         ffmpeg = FFmpeg.getInstance(this);
@@ -256,8 +250,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateAdapter() {
-        adapter = new InputImagesAdapter(this, imagesLocation);
-        mRecyclerView.swapAdapter(adapter, true);
+        adapter = new InputImagesAdapter(this,imagesLocation);
+        mRecyclerView.swapAdapter(adapter,true);
+        adapter.notifyDataSetChanged();
     }
 
     public File getImagesLocation() {
@@ -306,9 +301,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-        adapter = new InputImagesAdapter(this,imagesLocation);
-        mRecyclerView.swapAdapter(adapter,true);
+        updateAdapter();
+        checkFFmpeg();
+        InputImagesAdapter.renameAllImages();  //Sorting and renaming images in order for FFmpeg to work
     }
 
 

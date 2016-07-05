@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bignerdranch.android.multiselector.MultiSelector;
+import com.bignerdranch.android.multiselector.SelectableHolder;
 import com.bignerdranch.android.multiselector.SwappingHolder;
 
 import java.io.File;
@@ -35,18 +37,18 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
     private Bitmap placeholderBitmap;
     private Context context;
     private ActionMode deleteActionMode;
-    private MultiSelector mMultiSelector = new MultiSelector();
+    private static MultiSelector mMultiSelector = new MultiSelector();
     private ActionMode.Callback mDeleteMode = new ActionMode.Callback() {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             ((AppCompatActivity)context).getMenuInflater().inflate(R.menu.recycler_view_item_context, menu);
             mode.setTitle("Selected " + 1+ " image");
+            mMultiSelector.setSelectable(true);
             return true;
         }
 
         @Override
         public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
-            mMultiSelector.setSelectable(true);
             return false;
         }
 
@@ -139,7 +141,12 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
         }
     }
 
+    @Override
+    public void onViewRecycled(ViewHolder holder) {
+        super.onViewRecycled(holder);
+        Log.d(TAG, "onClick: isSelectable ----------" + mMultiSelector.isSelectable() + ", selectedPositions " + mMultiSelector.getSelectedPositions());
 
+    }
 
     private static boolean checkImageWorkerTask(File imageFile, ImageView imageView) {
         ImageWorkerTask imageWorkerTask = getImageWorkerTask(imageView);
@@ -183,6 +190,8 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
 
     public class ViewHolder extends SwappingHolder
             implements View.OnClickListener, View.OnLongClickListener {
+
+        private SparseBooleanArray mSelections = new SparseBooleanArray();
         private ImageView mImageView;
         private Uri imageUri;
 
@@ -205,14 +214,12 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
             if (mImageView == null) {
                 return;
             }
+            Log.d(TAG, "onClick: isSelectable ----------" + mMultiSelector.isSelectable() + ", selectedPositions " + mMultiSelector.getSelectedPositions());
 
-            if (!mMultiSelector.isSelectable()){
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setDataAndType(imageUri, "image/*");
-                context.startActivity(intent);
-            }
+//            mMultiSelector.setSelectable((mMultiSelector.getSelectedPositions().size() > 0));
+
+
             if (!mMultiSelector.tapSelection(this)) {
-
                 setActivated(!isActivated());
                 mMultiSelector.setSelected(this, isActivated());
             } else if (mMultiSelector.getSelectedPositions().size()==0) {
@@ -220,12 +227,18 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
                     deleteActionMode.finish();
                 }
             }
+            if (!mMultiSelector.isSelectable()){
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(imageUri, "image/*");
+                context.startActivity(intent);
+            }
             if (deleteActionMode!=null) {
                 if (mMultiSelector.getSelectedPositions().size()>1)
                     deleteActionMode.setTitle("Selected " + mMultiSelector.getSelectedPositions().size()+ " images");
                 else
-                    deleteActionMode.setTitle("Selected " + 1+ " image");
+                    deleteActionMode.setTitle("Selected 1 image");
             }
+            Log.d(TAG, "onClick: isSelectable ||||||||||" + mMultiSelector.isSelectable() + ", selectedPositions " + mMultiSelector.getSelectedPositions());
         }
 
         @Override
@@ -239,7 +252,6 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
     private void startSelector() {
         AppCompatActivity activity = (MainActivity) context;
         deleteActionMode = activity.startSupportActionMode(mDeleteMode);
-        mMultiSelector.setSelectable(true);
     }
 
 }
