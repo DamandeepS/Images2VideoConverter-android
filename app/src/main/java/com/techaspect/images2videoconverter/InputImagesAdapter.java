@@ -52,13 +52,13 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            mode.finish();
             switch (item.getItemId()) {
                 case R.id.delete_imported_item:
                     // Delete images from filesystem
                     deleteSelection();
                     mMultiSelector.clearSelections();
                     notifyDataSetChanged();
+                    mode.finish();
                     return true;
                 default:
                     break;

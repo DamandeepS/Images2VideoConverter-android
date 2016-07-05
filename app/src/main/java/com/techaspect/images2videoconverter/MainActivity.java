@@ -85,6 +85,11 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView = (RecyclerView)findViewById(R.id.recyclerView);
         layoutManager = new GridLayoutManager(this,3);
         mRecyclerView.setLayoutManager(layoutManager);
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
         updateAdapter();
         checkFFmpeg();
         InputImagesAdapter.renameAllImages();  //Sorting and renaming images in order for FFmpeg to work
