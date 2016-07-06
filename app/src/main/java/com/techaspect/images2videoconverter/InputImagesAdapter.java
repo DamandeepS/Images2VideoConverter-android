@@ -23,7 +23,9 @@ import android.widget.Toast;
 import com.bignerdranch.android.multiselector.MultiSelector;
 import com.bignerdranch.android.multiselector.SelectableHolder;
 import com.bignerdranch.android.multiselector.SwappingHolder;
+import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.view.SimpleDraweeView;
+import com.facebook.imagepipeline.core.ImagePipelineConfig;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -160,6 +162,10 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
     @Override
     public void onViewRecycled(ViewHolder holder) {
         super.onViewRecycled(holder);
+        ImagePipelineConfig config = ImagePipelineConfig.newBuilder(context)
+                .setDownsampleEnabled(true)
+                .build();
+        Fresco.initialize(context, config);
         Log.d(TAG, "onClick: isSelectable ----------" + mMultiSelector.isSelectable() + ", selectedPositions " + mMultiSelector.getSelectedPositions());
 
     }
@@ -242,6 +248,7 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
                 if (deleteActionMode!=null) {
                     deleteActionMode.finish();
                 }
+                return;
             }
             if (!mMultiSelector.isSelectable()){
                 Intent intent = new Intent(Intent.ACTION_VIEW);
