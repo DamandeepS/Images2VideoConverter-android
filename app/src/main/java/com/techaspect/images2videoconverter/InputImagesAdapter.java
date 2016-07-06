@@ -4,20 +4,31 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.ColorFilter;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.StateListDrawable;
 import android.net.Uri;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.ContextCompatApi24;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
+import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.SparseBooleanArray;
+import android.util.StateSet;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bignerdranch.android.multiselector.MultiSelector;
@@ -29,6 +40,7 @@ import com.facebook.imagepipeline.core.ImagePipelineConfig;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
 /**
  * Created by damandeeps on 6/20/2016.
@@ -39,6 +51,7 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
     private File imagesLocation;
     private Context context;
     private ActionMode deleteActionMode;
+//    private int colorFilter = Color.parseColor("#cb233445");
     private static MultiSelector mMultiSelector = new MultiSelector();
     private ActionMode.Callback mDeleteMode = new ActionMode.Callback() {
         @Override
@@ -126,7 +139,6 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
     public InputImagesAdapter(Context context, File imagesLocation) {
         this.context=context;
         this.imagesLocation = imagesLocation;
-        refreshAllImages();
     }
 
 
@@ -141,8 +153,17 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
     public void onBindViewHolder(ViewHolder holder, int position) {
         File imageFile = imagesLocation.listFiles()[position];
         holder.imageUri = Uri.fromFile(imageFile);
+        holder.getIndex().setText(String.valueOf(position + 1));
+        Drawable drawable = ContextCompat.getDrawable(context, R.mipmap.ic_launcher);
+        drawable.setAlpha(1);
+        drawable.setFilterBitmap(true);
+        drawable.setColorFilter(new ColorFilter());
+        holder.setSelectionModeBackgroundDrawable(drawable);
         SimpleDraweeView imageView = holder.getmImageView();
         imageView.setImageBitmap(null);
+        if (!holder.isActivated())
+            holder.getIndex().setTextAppearance(context, android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Display2);
+
         Log.d(TAG, "onBindViewHolder: " + imageFile.getAbsolutePath());
         if (imageFile.exists()) {
             imageView.setImageURI(Uri.fromFile(imageFile));
@@ -161,6 +182,7 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
 
     @Override
     public void onViewRecycled(ViewHolder holder) {
+//        holder.getIndex().setTextAppearance(context, android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Display2);
         super.onViewRecycled(holder);
         ImagePipelineConfig config = ImagePipelineConfig.newBuilder(context)
                 .setDownsampleEnabled(true)
@@ -170,62 +192,33 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
 
     }
 
-    private static boolean checkImageWorkerTask(File imageFile, ImageView imageView) {
-        ImageWorkerTask imageWorkerTask = getImageWorkerTask(imageView);
-        if (imageWorkerTask!=null) {
-            final File workerFile = imageWorkerTask.getmImageFile();
-            if (workerFile!=imageFile)
-                imageWorkerTask.cancel(true);
-
-            else
-                return false;
-        }
-        return true;
-    }
-
-    private static ImageWorkerTask getImageWorkerTask(ImageView imageView) {
-        Drawable drawable = imageView.getDrawable();
-        if (drawable instanceof AsyncDrawable) {
-            AsyncDrawable asyncDrawable = (AsyncDrawable) drawable;
-            return asyncDrawable.getImageWorkerTask();
-        }
-        return null;
-    }
-
     @Override
     public int getItemCount() {
         return imagesLocation.listFiles().length;
-    }
-
-
-    private static class AsyncDrawable extends BitmapDrawable {
-        final WeakReference<ImageWorkerTask> taskWeakReference;
-
-        public AsyncDrawable(Resources resources, Bitmap bitmap, ImageWorkerTask imageWorkerTask) {
-            super(resources,bitmap);
-            taskWeakReference = new WeakReference<>(imageWorkerTask);
-        }
-
-        public ImageWorkerTask getImageWorkerTask() {
-            return taskWeakReference.get();
-        }
     }
 
     public class ViewHolder extends SwappingHolder
             implements View.OnClickListener, View.OnLongClickListener {
 
         private SimpleDraweeView mImageView;
+        private TextView index;
         private Uri imageUri;
 
         public ViewHolder(View itemView) {
             super(itemView,mMultiSelector);
             mImageView = (SimpleDraweeView) itemView.findViewById(R.id.imageView);
+            index = (TextView) itemView.findViewById(R.id.index);
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
             setSelectable(mMultiSelector.isSelectable());
             setActivated(mMultiSelector.isSelected(getAdapterPosition(),0));
-        }
 
+//            setSelectionModeBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_done_white));
+
+
+//            if (!isActivated() && !mMultiSelector.isSelectable())
+//                mImageView.setColorFilter(null);
+        }
 
         public SimpleDraweeView getmImageView() {
             return mImageView;
@@ -240,16 +233,22 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
 
 //            mMultiSelector.setSelectable((mMultiSelector.getSelectedPositions().size() > 0));
 
-
             if (!mMultiSelector.tapSelection(this)) {
-                setActivated(!isActivated());
-                mMultiSelector.setSelected(this, isActivated());
-            } else if (mMultiSelector.getSelectedPositions().size()==0) {
-                if (deleteActionMode!=null) {
-                    deleteActionMode.finish();
+                setActivated(!this.isActivated());
+                mMultiSelector.setSelected(this, this.isActivated());
+            } else {
+//                if (isActivated() && mMultiSelector.isSelectable())
+//                    this.mImageView.setColorFilter(colorFilter);
+//                else
+//                    this.mImageView.setColorFilter(null);
+                if (mMultiSelector.getSelectedPositions().size() == 0) {
+                    if (deleteActionMode != null) {
+                        deleteActionMode.finish();
+                    }
+                    return;
                 }
-                return;
             }
+
             if (!mMultiSelector.isSelectable()){
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setDataAndType(imageUri, "image/*");
@@ -267,10 +266,39 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
         @Override
         public boolean onLongClick(View view) {
             startSelector();
+//            this.mImageView.setColorFilter(colorFilter);
             mMultiSelector.setSelected(this, true);
             return true;
         }
 
+        @Override
+        public void setSelectionModeBackgroundDrawable(Drawable selectionModeBackgroundDrawable) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && mImageView!=null) {
+                mImageView.setForeground(selectionModeBackgroundDrawable);
+            }
+            super.setSelectionModeBackgroundDrawable(selectionModeBackgroundDrawable);
+        }
+
+
+        @Override
+        public void setActivated(boolean isActivated) {
+            Log.d(TAG, "isActivated: " + isActivated + ", Index: " + index);
+            if (index != null) {
+                if (isActivated) {
+                    index.setTextAppearance(context, android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Display3);
+                    index.setTextColor(Color.parseColor("#ffffff"));
+                }
+                else {
+                    index.setTextAppearance(context, android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Display2);
+//                    index.setTextColor(Color.parseColor("#212121"));
+                }
+            }
+            super.setActivated(isActivated);
+        }
+
+        public TextView getIndex() {
+            return index;
+        }
     }
 
     private void startSelector() {

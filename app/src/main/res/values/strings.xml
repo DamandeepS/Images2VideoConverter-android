@@ -5,4 +5,5 @@
     <string name="delete">Delete</string>
     <string name="FFmpeg_not_supported">FFmpeg is not supported by this device</string>
     <string name="change_layout">Change Layout</string>
+    <drawable name="clr_active">#777777</drawable>
 </resources>
