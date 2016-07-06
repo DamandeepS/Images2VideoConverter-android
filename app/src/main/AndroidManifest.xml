@@ -28,6 +28,11 @@
             </intent-filter>
         </activity>
         <service android:name=".ConverterService"/>
+        <receiver android:name=".CancelEncodingReceiver">
+            <intent-filter>
+                <action android:name="com.techaspect.images2videoconverter.CANCEL_ENCODING" />
+            </intent-filter>
+        </receiver>
     </application>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>

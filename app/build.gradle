@@ -30,6 +30,7 @@ dependencies {
     androidTestCompile 'com.android.support:support-annotations:24.0.0'
     compile 'com.android.support:recyclerview-v7:24.0.0'
     compile 'com.github.darsh2:MultipleImageSelect:v0.0.4'
+    compile 'com.facebook.fresco:fresco:0.11.0'
     compile 'com.bignerdranch.android:recyclerview-multiselect:+'
     compile files('libs/jcodec-0.1.9.jar')
     compile 'com.writingminds:FFmpegAndroid:0.3.2'

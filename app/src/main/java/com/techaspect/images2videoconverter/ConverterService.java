@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
@@ -29,6 +30,7 @@ public class ConverterService extends IntentService {
     private static String TAG = "ConverterService";
     private String fileName = "TEST";
     private float frameDuration = 1F;
+    NotificationManager notificationManager;
     private NotificationCompat.Builder notificationBuilder;
 
     public ConverterService(String name) {
@@ -43,6 +45,7 @@ public class ConverterService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         try {
+            notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
             fileName = intent.getStringExtra("fileName");
             frameDuration = intent.getFloatExtra("frameDuration",1F);
             createNotification();
@@ -65,14 +68,13 @@ public class ConverterService extends IntentService {
                     file.getAbsolutePath()
             };
             // scale=trunc(iw/2)*2:trunc(ih/2)*2 is needed to overcome not divisible by zero error
-            final NotificationManager notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+
             ffmpeg.execute(command, new FFmpegExecuteResponseHandler() {
                 String timeString="00:00:00";
 
                 @Override
                 public void onStart() {
-                    Log.d(TAG, "onStart: ENCODING STARTED");
-                    notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
+                     Log.d(TAG, "onStart: ENCODING STARTED");
                 }
                 @Override
                 public void onFinish() {
@@ -86,6 +88,7 @@ public class ConverterService extends IntentService {
                     Toast.makeText(ConverterService.this,"File Saved at " + file.getAbsolutePath(),Toast.LENGTH_LONG).show();
                     notificationBuilder.setContentText("File Saved at " + file.getAbsolutePath());
                     String fileLocation="";
+
                     try {
                         fileLocation = file.getCanonicalPath();
                     } catch (IOException e) {
@@ -125,6 +128,8 @@ public class ConverterService extends IntentService {
                             .setOngoing(true)
                             .setSmallIcon(R.mipmap.ic_notification_icon)
                             .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
+                            .setStyle(new android.support.v4.app.NotificationCompat.Style() {
+                            })
                             .setStyle(new NotificationCompat.BigPictureStyle().bigPicture(BitmapFactory.decodeFile(imagesLocation.listFiles()[imageIndex].getAbsolutePath())))
                             .setProgress((int)videoDuration, frameDurationInMilliseconds, false); // #0;
 
@@ -142,6 +147,8 @@ public class ConverterService extends IntentService {
                             .setContentText(message)
                             .setStyle(new NotificationCompat.BigTextStyle().bigText(message)); // #0;
 
+                    file.delete();
+                    Toast.makeText(ConverterService.this, "Encoding Failed for " + fileName,Toast.LENGTH_LONG).show();
                     notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
                 }
             });
@@ -154,6 +161,7 @@ public class ConverterService extends IntentService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Toast.makeText(this, "Service Started", Toast.LENGTH_LONG).show();
+        flags = START_NOT_STICKY;
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -188,5 +196,10 @@ public class ConverterService extends IntentService {
         milliseconds += Float.parseFloat(timeArray[1])*60000;
         milliseconds += Float.parseFloat(timeArray[0])*360000;
         return milliseconds;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
 }

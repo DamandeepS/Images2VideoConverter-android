@@ -23,6 +23,7 @@ import android.widget.Toast;
 import com.bignerdranch.android.multiselector.MultiSelector;
 import com.bignerdranch.android.multiselector.SelectableHolder;
 import com.bignerdranch.android.multiselector.SwappingHolder;
+import com.facebook.drawee.view.SimpleDraweeView;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -60,6 +61,7 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
                     deleteSelection();
                     mMultiSelector.clearSelections();
                     notifyDataSetChanged();
+                    refreshAllImages();
                     mode.finish();
                     return true;
                 default:
@@ -67,6 +69,8 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
             }
             return false;
         }
+
+
 
         @Override
         public void onDestroyActionMode(ActionMode actionMode) {
@@ -76,6 +80,12 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
 
 
     };
+
+    private void refreshAllImages() {
+        RecyclerView recyclerView = (RecyclerView)((MainActivity)context).findViewById(R.id.recyclerView);
+        recyclerView.setAdapter(null);
+        recyclerView.setAdapter(this);
+    }
 
 
     private void deleteSelection() {
@@ -95,10 +105,9 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
         }
 
         MainActivity.fileNumber=0;
-
         renameAllImages(); //Done So that FFmpeg could work seamlessly
-
     }
+
 
     protected static void renameAllImages() {
         for (int fileNumber = 0; fileNumber<MainActivity.imagesLocation.listFiles().length;fileNumber++) {
@@ -130,14 +139,20 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
     public void onBindViewHolder(ViewHolder holder, int position) {
         File imageFile = imagesLocation.listFiles()[position];
         holder.imageUri = Uri.fromFile(imageFile);
+        SimpleDraweeView imageView = holder.getmImageView();
         Log.d(TAG, "onBindViewHolder: " + imageFile.getAbsolutePath());
         if (imageFile.exists()) {
+            imageView.setImageURI(Uri.fromFile(imageFile));
+//                    holder
+            /*
             if (checkImageWorkerTask(imageFile, holder.getmImageView())) {
                 ImageWorkerTask imageWorkerTask = new ImageWorkerTask(holder.getmImageView());
                 AsyncDrawable asyncDrawable = new AsyncDrawable(holder.getmImageView().getResources(), placeholderBitmap, imageWorkerTask);
                 holder.getmImageView().setImageDrawable(asyncDrawable);
                 imageWorkerTask.execute(imageFile);
             }
+            Testing Fresco
+            */
         }
     }
 
@@ -175,6 +190,7 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
         return imagesLocation.listFiles().length;
     }
 
+
     private static class AsyncDrawable extends BitmapDrawable {
         final WeakReference<ImageWorkerTask> taskWeakReference;
 
@@ -191,13 +207,12 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
     public class ViewHolder extends SwappingHolder
             implements View.OnClickListener, View.OnLongClickListener {
 
-        private SparseBooleanArray mSelections = new SparseBooleanArray();
-        private ImageView mImageView;
+        private SimpleDraweeView mImageView;
         private Uri imageUri;
 
         public ViewHolder(View itemView) {
             super(itemView,mMultiSelector);
-            mImageView = (ImageView)itemView.findViewById(R.id.imageView);
+            mImageView = (SimpleDraweeView) itemView.findViewById(R.id.imageView);
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
             setSelectable(mMultiSelector.isSelectable());
@@ -205,7 +220,7 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
         }
 
 
-        public ImageView getmImageView() {
+        public SimpleDraweeView getmImageView() {
             return mImageView;
         }
 
@@ -247,6 +262,7 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
             mMultiSelector.setSelected(this, true);
             return true;
         }
+
     }
 
     private void startSelector() {
