@@ -7,8 +7,12 @@
         android:orderInCategory="100"
         android:title="@string/action_settings"
         app:showAsAction="never" />
-    <item android:title="@string/delete"
+    <item android:title="@string/delete_all"
         android:id="@+id/delete_all_imported_items"
         android:icon="@android:drawable/ic_menu_delete"
         app:showAsAction="withText|never"/>
+    <item android:title="@string/change_layout"
+        android:id="@+id/change_layout"
+        android:icon="@mipmap/ic_change_layout"
+        app:showAsAction="collapseActionView|ifRoom"/>
 </menu>

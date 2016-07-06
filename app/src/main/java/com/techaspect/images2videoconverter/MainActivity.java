@@ -14,6 +14,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -88,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView = (RecyclerView)findViewById(R.id.recyclerView);
 
         imagesLocation = getImagesLocation();
-        layoutManager = new GridLayoutManager(this,3);
+        layoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(layoutManager);
         updateAdapter();
 
@@ -236,23 +237,24 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                return true;
+            case R.id.delete_all_imported_items:
+                deleteAllImages();
+                updateAdapter();
+                return true;
+            case R.id.change_layout:
+                if (layoutManager instanceof GridLayoutManager)
+                    layoutManager = new LinearLayoutManager(this);
+                else
+                    layoutManager = new GridLayoutManager(this,3);
+                mRecyclerView.setLayoutManager(layoutManager);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.delete_all_imported_items) {
-            deleteAllImages();
-            updateAdapter();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     private void updateAdapter() {

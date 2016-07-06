@@ -35,7 +35,6 @@ import java.lang.ref.WeakReference;
 public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.ViewHolder>  {
     private static final String TAG = "InputImagesAdapter";
     private File imagesLocation;
-    private Bitmap placeholderBitmap;
     private Context context;
     private ActionMode deleteActionMode;
     private static MultiSelector mMultiSelector = new MultiSelector();
@@ -125,6 +124,7 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
     public InputImagesAdapter(Context context, File imagesLocation) {
         this.context=context;
         this.imagesLocation = imagesLocation;
+        refreshAllImages();
     }
 
 
@@ -140,6 +140,7 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
         File imageFile = imagesLocation.listFiles()[position];
         holder.imageUri = Uri.fromFile(imageFile);
         SimpleDraweeView imageView = holder.getmImageView();
+        imageView.setImageBitmap(null);
         Log.d(TAG, "onBindViewHolder: " + imageFile.getAbsolutePath());
         if (imageFile.exists()) {
             imageView.setImageURI(Uri.fromFile(imageFile));
