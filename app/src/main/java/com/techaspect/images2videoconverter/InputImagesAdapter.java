@@ -65,8 +65,8 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
                     notifyDataSetChanged();
                     refreshAllImages();
 
-                    /* refreshAllImages actually resets the adapter
-
+                    /*
+                        refreshAllImages actually resets the adapter
                      */
 
                     mode.finish();
@@ -161,7 +161,7 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
             if (!holder.isActivated())
                 holder.getIndex().setTextAppearance(context, android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Display2);
             else {
-                holder.getIndex().setTextAppearance(context, android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Display3);
+                holder.getIndex().setTextAppearance(context, android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Display4);
                 holder.getIndex().setTextColor(Color.parseColor("#ffffff"));
             }
         if (imageFile.exists()) {
@@ -221,7 +221,7 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
             }
 
             if (!mMultiSelector.isSelectable()){
-                Intent intent = new Intent(Intent.ACTION_VIEW);
+                Intent intent = new Intent(context, ImageViewer.class);
                 intent.setDataAndType(imageUri, "image/*");
                 context.startActivity(intent);
             }
@@ -246,7 +246,7 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
             Log.d(TAG, "isActivated: " + isActivated + ", Index: " + index);
             if (index != null && mMultiSelector.isSelectable())
                 if (isActivated) {
-                    index.setTextAppearance(context, android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Display3);
+                    index.setTextAppearance(context, android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Display4);
                     index.setTextColor(Color.parseColor("#ffffff"));
                 }
                 else
