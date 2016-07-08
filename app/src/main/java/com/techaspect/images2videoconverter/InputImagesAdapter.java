@@ -1,5 +1,6 @@
 package com.techaspect.images2videoconverter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -37,14 +38,14 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
     private Context context;
     private ActionMode deleteActionMode;
 //    private int colorFilter = Color.parseColor("#cb233445");
-    private static MultiSelector mMultiSelector = new MultiSelector();
+    private MultiSelector mMultiSelector = new MultiSelector();
 
 
     private ActionMode.Callback mDeleteMode = new ActionMode.Callback() {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             ((AppCompatActivity)context).getMenuInflater().inflate(R.menu.recycler_view_item_context, menu);
-            mode.setTitle("Selected " + 1+ " image");
+            mode.setTitle("Selected 1 image");
             mMultiSelector.setSelectable(true);
             return true;
         }
@@ -63,6 +64,11 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
                     mMultiSelector.clearSelections();
                     notifyDataSetChanged();
                     refreshAllImages();
+
+                    /* refreshAllImages actually resets the adapter
+
+                     */
+
                     mode.finish();
                     return true;
                 default:
@@ -84,16 +90,14 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
 
     private void refreshAllImages() {
         RecyclerView recyclerView = (RecyclerView)((MainActivity)context).findViewById(R.id.recyclerView);
-        recyclerView.setAdapter(null);
-        recyclerView.setAdapter(this);
+        recyclerView.swapAdapter(this,true);
     }
 
 
     private void deleteSelection() {
         int i=0;
         for (File image: imagesLocation.listFiles()) {
-            Log.d(TAG, "deleteSelection: isSelected: " + mMultiSelector.isSelected(i,0) + ", for index: " + i );
-            if (mMultiSelector.isSelected(i,0)) {
+           if (mMultiSelector.isSelected(i,0)) {
                 try {
                     boolean result = image.delete();
                     Log.d(TAG, "deleteSelection: Image name: " + image.getName() + ", Deleted: " + result);
@@ -106,15 +110,19 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
         }
 
         MainActivity.fileNumber=0;
-        renameAllImages(); //Done So that FFmpeg could work seamlessly
+        renameAllImages(); /*
+                              Done So that FFmpeg could work seamlessly
+                           */
     }
 
 
     protected static void renameAllImages() {
         for (int fileNumber = 0; fileNumber<MainActivity.imagesLocation.listFiles().length;fileNumber++) {
-            String number =  String.format("%03d", fileNumber);
+            @SuppressLint("DefaultLocale") String number =  String.format("%03d", fileNumber);
             String imageFileName = "IMAGE_" + number;
-//        check if file with same name exists
+            /*
+                check if file with same name exists
+             */
 
             Log.d(TAG, "createImageFile: imageFileName: " + imageFileName);
             File file = new File(MainActivity.imagesLocation,imageFileName + ".jpg");
@@ -136,6 +144,7 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
     }
 
 
+    @SuppressLint("PrivateResource")
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         File imageFile = imagesLocation.listFiles()[position];
@@ -155,17 +164,9 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
                 holder.getIndex().setTextAppearance(context, android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Display3);
                 holder.getIndex().setTextColor(Color.parseColor("#ffffff"));
             }
-                Log.d(TAG, "onBindViewHolder: " + imageFile.getAbsolutePath());
         if (imageFile.exists()) {
             imageView.setImageURI(Uri.fromFile(imageFile));
-//                    holder
             /*
-            if (checkImageWorkerTask(imageFile, holder.getmImageView())) {
-                ImageWorkerTask imageWorkerTask = new ImageWorkerTask(holder.getmImageView());
-                AsyncDrawable asyncDrawable = new AsyncDrawable(holder.getmImageView().getResources(), placeholderBitmap, imageWorkerTask);
-                holder.getmImageView().setImageDrawable(asyncDrawable);
-                imageWorkerTask.execute(imageFile);
-            }
             Testing Fresco
             */
         }
@@ -173,14 +174,11 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
 
     @Override
     public void onViewRecycled(ViewHolder holder) {
-//        holder.getIndex().setTextAppearance(context, android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Display2);
         super.onViewRecycled(holder);
         ImagePipelineConfig config = ImagePipelineConfig.newBuilder(context)
                 .setDownsampleEnabled(true)
                 .build();
         Fresco.initialize(context, config);
-        Log.d(TAG, "onClick: isSelectable ----------" + mMultiSelector.isSelectable() + ", selectedPositions " + mMultiSelector.getSelectedPositions());
-
     }
 
     @Override
@@ -203,12 +201,6 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
             itemView.setOnLongClickListener(this);
             setSelectable(mMultiSelector.isSelectable());
             setActivated(mMultiSelector.isSelected(getAdapterPosition(),0));
-
-//            setSelectionModeBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_done_white));
-
-
-//            if (!isActivated() && !mMultiSelector.isSelectable())
-//                mImageView.setColorFilter(null);
         }
 
         public SimpleDraweeView getmImageView() {
@@ -217,27 +209,15 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
 
         @Override
         public void onClick(View view) {
-            if (mImageView == null) {
+            if (mImageView == null)
                 return;
-            }
-            Log.d(TAG, "onClick: isSelectable ----------" + mMultiSelector.isSelectable() + ", selectedPositions " + mMultiSelector.getSelectedPositions());
-
-//            mMultiSelector.setSelectable((mMultiSelector.getSelectedPositions().size() > 0));
 
             if (!mMultiSelector.tapSelection(this)) {
                 setActivated(!this.isActivated());
                 mMultiSelector.setSelected(this, this.isActivated());
-            } else {
-//                if (isActivated() && mMultiSelector.isSelectable())
-//                    this.mImageView.setColorFilter(colorFilter);
-//                else
-//                    this.mImageView.setColorFilter(null);
-                if (mMultiSelector.getSelectedPositions().size() == 0) {
-                    if (deleteActionMode != null) {
+            } else if (mMultiSelector.getSelectedPositions().size() == 0 && deleteActionMode != null) {
                         deleteActionMode.finish();
-                    }
                     return;
-                }
             }
 
             if (!mMultiSelector.isSelectable()){
@@ -245,49 +225,34 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
                 intent.setDataAndType(imageUri, "image/*");
                 context.startActivity(intent);
             }
-            if (deleteActionMode!=null) {
+            if (deleteActionMode!=null)
                 if (mMultiSelector.getSelectedPositions().size()>1)
                     deleteActionMode.setTitle("Selected " + mMultiSelector.getSelectedPositions().size()+ " images");
                 else
                     deleteActionMode.setTitle("Selected 1 image");
-            }
-            Log.d(TAG, "onClick: isSelectable ||||||||||" + mMultiSelector.isSelectable() + ", selectedPositions " + mMultiSelector.getSelectedPositions());
         }
 
         @Override
         public boolean onLongClick(View view) {
             startSelector();
-//            this.mImageView.setColorFilter(colorFilter);
             mMultiSelector.setSelected(this, true);
             return true;
         }
 
-        @Override
-        public void setSelectionModeBackgroundDrawable(Drawable selectionModeBackgroundDrawable) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && mImageView!=null) {
-                mImageView.setForeground(selectionModeBackgroundDrawable);
-            }
-            super.setSelectionModeBackgroundDrawable(selectionModeBackgroundDrawable);
-        }
 
-
+        @SuppressLint("PrivateResource")
         @Override
         public void setActivated(boolean isActivated) {
             Log.d(TAG, "isActivated: " + isActivated + ", Index: " + index);
-            if (index != null && mMultiSelector.isSelectable()) {
+            if (index != null && mMultiSelector.isSelectable())
                 if (isActivated) {
                     index.setTextAppearance(context, android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Display3);
                     index.setTextColor(Color.parseColor("#ffffff"));
                 }
-                else {
+                else
                     index.setTextAppearance(context, android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Display2);
-//                    index.setTextColor(Color.parseColor("#212121"));
-                }
-            }
             super.setActivated(isActivated);
         }
-
-
 
         public TextView getIndex() {
             return index;

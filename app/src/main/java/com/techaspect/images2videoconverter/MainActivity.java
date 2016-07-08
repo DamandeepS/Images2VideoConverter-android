@@ -271,23 +271,6 @@ public class MainActivity extends AppCompatActivity {
         return imagesLocation;
     }
 
-    /*public static Bitmap getBitmapFromMemoryCache(String key) {
-        return mMemoryCache.get(key);
-    }
-
-    public static void setBitmapToMemoryCache(String key, Bitmap bitmap) {
-        if (getBitmapFromMemoryCache(key) == null) {
-            if (key != null && bitmap != null) {
-                mMemoryCache.put(key, bitmap);
-            }
-        }
-    }
-
-
-    public static void evictMemoryCache() {
-        mMemoryCache.evictAll();
-    }*/
-
     private void copyFile(File sourceFile, File destFile) throws IOException {
         if (!sourceFile.exists()) {
             return;
