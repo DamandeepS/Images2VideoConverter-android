@@ -2,45 +2,30 @@ package com.techaspect.images2videoconverter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.StateListDrawable;
 import android.net.Uri;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.ContextCompatApi24;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
-import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.util.SparseBooleanArray;
-import android.util.StateSet;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bignerdranch.android.multiselector.MultiSelector;
-import com.bignerdranch.android.multiselector.SelectableHolder;
 import com.bignerdranch.android.multiselector.SwappingHolder;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
 
 import java.io.File;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 
 /**
  * Created by damandeeps on 6/20/2016.
@@ -53,6 +38,8 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
     private ActionMode deleteActionMode;
 //    private int colorFilter = Color.parseColor("#cb233445");
     private static MultiSelector mMultiSelector = new MultiSelector();
+
+
     private ActionMode.Callback mDeleteMode = new ActionMode.Callback() {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -161,10 +148,14 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
         holder.setSelectionModeBackgroundDrawable(drawable);
         SimpleDraweeView imageView = holder.getmImageView();
         imageView.setImageBitmap(null);
-        if (!holder.isActivated())
-            holder.getIndex().setTextAppearance(context, android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Display2);
-
-        Log.d(TAG, "onBindViewHolder: " + imageFile.getAbsolutePath());
+        if (mMultiSelector.isSelectable())
+            if (!holder.isActivated())
+                holder.getIndex().setTextAppearance(context, android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Display2);
+            else {
+                holder.getIndex().setTextAppearance(context, android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Display3);
+                holder.getIndex().setTextColor(Color.parseColor("#ffffff"));
+            }
+                Log.d(TAG, "onBindViewHolder: " + imageFile.getAbsolutePath());
         if (imageFile.exists()) {
             imageView.setImageURI(Uri.fromFile(imageFile));
 //                    holder
@@ -283,7 +274,7 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
         @Override
         public void setActivated(boolean isActivated) {
             Log.d(TAG, "isActivated: " + isActivated + ", Index: " + index);
-            if (index != null) {
+            if (index != null && mMultiSelector.isSelectable()) {
                 if (isActivated) {
                     index.setTextAppearance(context, android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Display3);
                     index.setTextColor(Color.parseColor("#ffffff"));
@@ -296,6 +287,8 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
             super.setActivated(isActivated);
         }
 
+
+
         public TextView getIndex() {
             return index;
         }
@@ -303,6 +296,7 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
 
     private void startSelector() {
         AppCompatActivity activity = (MainActivity) context;
+        mMultiSelector.clearSelections();
         deleteActionMode = activity.startSupportActionMode(mDeleteMode);
     }
 

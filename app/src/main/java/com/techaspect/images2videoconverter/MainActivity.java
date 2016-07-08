@@ -34,7 +34,6 @@ import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
-import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
 
 import java.io.File;
@@ -249,7 +248,7 @@ public class MainActivity extends AppCompatActivity {
                 if (layoutManager instanceof GridLayoutManager)
                     layoutManager = new LinearLayoutManager(this);
                 else
-                    layoutManager = new GridLayoutManager(this,3);
+                    layoutManager = new GridLayoutManager(this,2);
                 mRecyclerView.setLayoutManager(layoutManager);
                 return true;
             default:

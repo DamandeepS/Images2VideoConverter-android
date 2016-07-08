@@ -9,9 +9,8 @@
 
     <com.facebook.drawee.view.SimpleDraweeView
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
         android:id="@+id/imageView"
-        android:adjustViewBounds="true"
+        android:layout_height="wrap_content"
         app:layout_constraintLeft_toLeftOf="@+id/constraintLayout2"
         tools:layout_constraintLeft_creator="1"
         app:layout_constraintTop_toTopOf="@+id/constraintLayout2"
@@ -23,13 +22,18 @@
         app:layout_constraintBottom_toBottomOf="@+id/constraintLayout2"
         android:layout_marginBottom="2dp"
         tools:layout_constraintBottom_creator="1"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintVertical_bias="0.0"
+        android:adjustViewBounds="true"
+        android:cropToPadding="false"
+        android:fadingEdge="vertical"
+        android:scaleType="center" />
 
     <TextView
         android:text="Index"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/index"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display2"
         app:layout_constraintLeft_toLeftOf="@+id/imageView"
         app:layout_constraintTop_toTopOf="@+id/imageView"
         app:layout_constraintRight_toRightOf="@+id/imageView"
@@ -38,7 +42,6 @@
         app:layout_constraintBottom_toBottomOf="@+id/imageView"
         android:layout_marginBottom="16dp"
         app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintVertical_bias="1.0"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display2" />
+        app:layout_constraintVertical_bias="1.0" />
 
 </android.support.constraint.ConstraintLayout>
