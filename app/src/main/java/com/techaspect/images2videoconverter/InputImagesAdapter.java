@@ -23,9 +23,7 @@ import android.widget.TextView;
 
 import com.bignerdranch.android.multiselector.MultiSelector;
 import com.bignerdranch.android.multiselector.SwappingHolder;
-import com.facebook.drawee.backends.pipeline.Fresco;
-import com.facebook.drawee.view.SimpleDraweeView;
-import com.facebook.imagepipeline.core.ImagePipelineConfig;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
 
@@ -156,7 +154,7 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
         drawable.setFilterBitmap(true);
         drawable.setColorFilter(new ColorFilter());
         holder.setSelectionModeBackgroundDrawable(drawable);
-        SimpleDraweeView imageView = holder.getmImageView();
+        ImageView imageView = holder.getmImageView();
         imageView.setImageBitmap(null);
         if (mMultiSelector.isSelectable())
             if (!holder.isActivated())
@@ -166,7 +164,7 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
                 holder.getIndex().setTextColor(Color.parseColor("#ffffff"));
             }
         if (imageFile.exists()) {
-            imageView.setImageURI(Uri.fromFile(imageFile));
+            Picasso.with(context).load(imageFile).into(imageView);
             /*
             Testing Fresco
             */
@@ -176,10 +174,6 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
     @Override
     public void onViewRecycled(ViewHolder holder) {
         super.onViewRecycled(holder);
-        ImagePipelineConfig config = ImagePipelineConfig.newBuilder(context)
-                .setDownsampleEnabled(true)
-                .build();
-        Fresco.initialize(context, config);
     }
 
     @Override

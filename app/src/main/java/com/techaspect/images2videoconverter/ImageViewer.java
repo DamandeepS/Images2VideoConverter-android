@@ -14,10 +14,6 @@ import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.ImageView;
-
-import com.facebook.drawee.backends.pipeline.Fresco;
-import com.facebook.drawee.view.SimpleDraweeView;
-
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -71,8 +67,7 @@ public class ImageViewer extends AppCompatActivity {
             mRecyclerView.setVisibility(View.GONE);
         else
             mRecyclerView.setVisibility(View.VISIBLE);
-        mRecyclerView.clearFocus();
-        mRecyclerView.smoothScrollToPosition(0);
+
     }
 
     public void saveImage(View view) {
