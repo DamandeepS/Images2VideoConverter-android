@@ -4,13 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
+    android:id="@+id/constraintLayout2"
     android:layout_height="wrap_content"
-    android:id="@+id/constraintLayout2">
+    android:fitsSystemWindows="false"
+    android:filterTouchesWhenObscured="false">
 
-    <com.facebook.drawee.view.SimpleDraweeView
+    <ImageView
         android:layout_width="0dp"
         android:id="@+id/imageView"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:fadingEdge="vertical"
         app:layout_constraintLeft_toLeftOf="@+id/constraintLayout2"
         tools:layout_constraintLeft_creator="1"
         app:layout_constraintTop_toTopOf="@+id/constraintLayout2"
@@ -20,13 +23,7 @@
         android:layout_marginEnd="2dp"
         tools:layout_constraintRight_creator="1"
         app:layout_constraintBottom_toBottomOf="@+id/constraintLayout2"
-        android:layout_marginBottom="2dp"
-        tools:layout_constraintBottom_creator="1"
-        app:layout_constraintVertical_bias="0.0"
-        android:adjustViewBounds="true"
-        android:cropToPadding="false"
-        android:fadingEdge="vertical"
-        android:scaleType="center" />
+        android:layout_marginBottom="2dp" />
 
     <TextView
         android:text="Index"

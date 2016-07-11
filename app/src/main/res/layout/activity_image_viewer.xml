@@ -31,4 +31,62 @@
         app:layout_constraintVertical_bias="1.0">
 
     </android.support.v7.widget.RecyclerView>
+
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:layout_editor_absoluteY="0dp"
+        app:layout_constraintLeft_toLeftOf="@+id/activity_image_viewer"
+        app:layout_constraintTop_toTopOf="@+id/activity_image_viewer"
+        app:layout_constraintRight_toRightOf="@+id/activity_image_viewer">
+
+        <ImageButton
+            android:id="@+id/cancel_filter"
+            android:onClick="resetImage"
+            android:src="@mipmap/ic_image_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="false"
+            android:layout_alignParentStart="true"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="0dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="false"
+            android:background="@android:color/transparent"
+            android:elevation="5dp"
+            android:padding="5dp" />
+
+        <ImageButton
+            android:id="@+id/save_image"
+            android:onClick="saveImage"
+            android:src="@mipmap/ic_save_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:layout_editor_absoluteX="312dp"
+            tools:layout_editor_absoluteY="0dp"
+            android:adjustViewBounds="false"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:background="@android:color/transparent"
+            android:elevation="5dp"
+            android:padding="5dp" />
+
+        <ImageButton
+            android:id="@+id/apply_filter"
+            android:onClick="applyFilter"
+            android:src="@mipmap/ic_filter"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            tools:layout_editor_absoluteX="156dp"
+            tools:layout_editor_absoluteY="0dp"
+            android:layout_centerInParent="false"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:background="@android:color/transparent"
+            android:elevation="5dp"
+            android:padding="5dp" />
+
+
+    </RelativeLayout>
 </android.support.constraint.ConstraintLayout>

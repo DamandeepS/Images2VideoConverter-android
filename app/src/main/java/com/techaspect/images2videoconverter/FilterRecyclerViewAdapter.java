@@ -3,6 +3,9 @@ package com.techaspect.images2videoconverter;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -46,49 +49,56 @@ public class FilterRecyclerViewAdapter extends RecyclerView.Adapter<FilterRecycl
         filters.add( new Filters("Normal", new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mGPUImage.setFilter(new GPUImageFilter(GPUImageFilter.NO_FILTER_VERTEX_SHADER, GPUImageFilter. NO_FILTER_FRAGMENT_SHADER));
+                mGPUImage.setFilter(new GPUImageFilter());
+                mGPUImage.setImage(mGPUImage.getBitmapWithFilterApplied());
             }
         }));
         filters.add( new Filters("Sepia", new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mGPUImage.setFilter(new GPUImageSepiaFilter());
+                mGPUImage.setImage(mGPUImage.getBitmapWithFilterApplied());
             }
         }));
         filters.add( new Filters("Lighten and Blend", new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mGPUImage.setFilter(new GPUImageLightenBlendFilter());
+                mGPUImage.setImage(mGPUImage.getBitmapWithFilterApplied());
             }
         }));
         filters.add( new Filters("Color Invert", new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mGPUImage.setFilter(new GPUImageColorInvertFilter());
+                mGPUImage.setImage(mGPUImage.getBitmapWithFilterApplied());
             }
         }));
         filters.add( new Filters("Emboss", new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mGPUImage.setFilter(new GPUImageEmbossFilter());
+                mGPUImage.setImage(mGPUImage.getBitmapWithFilterApplied());
             }
         }));
         filters.add( new Filters("Brightness", new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mGPUImage.setFilter(new GPUImageBrightnessFilter((float)(brightnessFilterValue*2)/100));
-                final Dialog yourDialog = new Dialog(context);
+                final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
                 LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 View layout = inflater.inflate(R.layout.dialog_seekbar_layout, (ViewGroup)((AppCompatActivity)context).findViewById(R.id.your_dialog_root_element));
-                yourDialog.setContentView(layout);
+                dialogBuilder.setView(layout);
                 final SeekBar yourDialogSeekBar = (SeekBar)layout.findViewById(R.id.dialog_seekbar);
-
-                yourDialogSeekBar.setProgress(brightnessFilterValue+50);
+//                dialogBuilder.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+//                dialogBuilder.getWindow().getWindowStyle()
+                yourDialogSeekBar.setProgress(100);
+                yourDialogSeekBar.setMax(200);
+                final Dialog dialog = dialogBuilder.create();
                 SeekBar.OnSeekBarChangeListener seekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                        int seekBarValue =  seekBar.getProgress()-50;
-                        mGPUImage.setFilter(new GPUImageBrightnessFilter((float)(seekBarValue*2)/100));
+                        int seekBarValue =  seekBar.getProgress()-100;
+                        mGPUImage.setFilter(new GPUImageBrightnessFilter((float)(seekBarValue)/200));
                     }
 
                     @Override
@@ -96,27 +106,27 @@ public class FilterRecyclerViewAdapter extends RecyclerView.Adapter<FilterRecycl
                     }
                     @Override
                     public void onStopTrackingTouch(SeekBar seekBar) {
-                        brightnessFilterValue = seekBar.getProgress()-50;
-                        int seekBarValue =  seekBar.getProgress()-50;
-                        mGPUImage.setFilter(new GPUImageBrightnessFilter((float)(seekBarValue*2)/100));
-                        yourDialog.dismiss();
+                        mGPUImage.setImage(mGPUImage.getBitmapWithFilterApplied());
+                        dialog.dismiss();
                     }
                 };
                 yourDialogSeekBar.setOnSeekBarChangeListener(seekBarChangeListener);
-                yourDialog.show();
+                dialog.show();
             }
         }));
         filters.add( new Filters("Contrast", new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mGPUImage.setFilter(new GPUImageContrastFilter((float)(contrastFilterValue*2)/100));
-                final Dialog yourDialog = new Dialog(context);
+                final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
                 LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 View layout = inflater.inflate(R.layout.dialog_seekbar_layout, (ViewGroup)((AppCompatActivity)context).findViewById(R.id.your_dialog_root_element));
-                yourDialog.setContentView(layout);
+                dialogBuilder.setView(layout);
                 final SeekBar yourDialogSeekBar = (SeekBar)layout.findViewById(R.id.dialog_seekbar);
                 yourDialogSeekBar.setMax(100);
+//                dialogBuilder.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
                 yourDialogSeekBar.setProgress(contrastFilterValue);
+                final Dialog dialog = dialogBuilder.create();
+                dialogBuilder.setTitle("Contrast");
                 SeekBar.OnSeekBarChangeListener seekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -129,14 +139,13 @@ public class FilterRecyclerViewAdapter extends RecyclerView.Adapter<FilterRecycl
                     }
                     @Override
                     public void onStopTrackingTouch(SeekBar seekBar) {
-                        contrastFilterValue = seekBar.getProgress();
-                        int seekBarValue =  seekBar.getProgress();
-                        mGPUImage.setFilter(new GPUImageContrastFilter((float)(seekBarValue*2)/100));
-                        yourDialog.dismiss();
+                        mGPUImage.setImage(mGPUImage.getBitmapWithFilterApplied());
+                        dialog.dismiss();
                     }
                 };
                 yourDialogSeekBar.setOnSeekBarChangeListener(seekBarChangeListener);
-                yourDialog.show();
+//                dialogBuilder.s
+                dialogBuilder.show();
             }
         }));
     }

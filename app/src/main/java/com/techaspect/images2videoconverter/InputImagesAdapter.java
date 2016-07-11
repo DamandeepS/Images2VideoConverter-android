@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bignerdranch.android.multiselector.MultiSelector;
@@ -189,13 +190,13 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
     public class ViewHolder extends SwappingHolder
             implements View.OnClickListener, View.OnLongClickListener {
 
-        private SimpleDraweeView mImageView;
+        private ImageView mImageView;
         private TextView index;
         private Uri imageUri;
 
         public ViewHolder(View itemView) {
             super(itemView,mMultiSelector);
-            mImageView = (SimpleDraweeView) itemView.findViewById(R.id.imageView);
+            mImageView = (ImageView) itemView.findViewById(R.id.imageView);
             index = (TextView) itemView.findViewById(R.id.index);
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
@@ -203,7 +204,7 @@ public class InputImagesAdapter extends RecyclerView.Adapter<InputImagesAdapter.
             setActivated(mMultiSelector.isSelected(getAdapterPosition(),0));
         }
 
-        public SimpleDraweeView getmImageView() {
+        public ImageView getmImageView() {
             return mImageView;
         }
 
